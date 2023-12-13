@@ -1,0 +1,47 @@
+/// @description Is triggered immediately after creation of obj_TextBoxNoChoice
+/// obj_TextBoxNoChoice does this one frame after creation
+with(obj_TextBoxBlank)	//ensures there are no blank textboxes
+	instance_destroy(obj_TextBoxBlank);
+finished = false;
+//determines where to cut the words in order to go to the next page
+//determines the size of the textbox
+numOfPages = 0;
+textBoxW = spriteWidth - xBufferL - xBufferR;
+totalBoxW = spriteWidth - 2 * xBufferR;
+stringHeight = string_height(string_char_at(totalText, 1));
+nameHeightNeeded = stringHeight + yBuffer;
+while(!finished)
+{
+	//determine sizes of text
+	textBoxH = string_height_ext(totalText, stringHeight, textBoxW);
+	totalHeightOfLines = spriteHeight - nameHeightNeeded;
+	//if it can fit, print it
+	if(textBoxH <= totalHeightOfLines)
+	{
+		finished = true;
+		text[numOfPages] = totalText;
+		numOfPages++;
+	}
+	//if not, determine how much can and print it
+	else
+	{
+		cnter = 1;
+		tester = string_copy(totalText, 1, cnter);
+		sizeOfTester = string_height_ext(tester, stringHeight, textBoxW);
+		while(sizeOfTester < totalHeightOfLines)
+		{
+			cnter++;
+			tester = string_copy(totalText, 1, cnter);
+			sizeOfTester = string_height_ext(tester, stringHeight, textBoxW);
+		}
+		numOfCharacters = cnter - 1;
+		//only cut off after a word
+		while(string_char_at(tester, numOfCharacters) != " " && string_char_at(tester, numOfCharacters) != "\n")
+			numOfCharacters--;
+		text[numOfPages] = string_copy(totalText, 1, numOfCharacters);
+		numOfPages++;
+		//create a new string that contains the leftovers from this one, then repeat
+		totalText = string_copy(totalText, numOfCharacters + 1, string_length(totalText));
+	}
+}
+numOfOptions = array_length_1d(optionText) - 1;
