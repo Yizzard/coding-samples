@@ -1,0 +1,397 @@
+//use an action or attack
+//determine target type (0 = self, 1 = single party member, 2 = single enemy, 3 = all enemies, 4 = all party, 5 = everyone on field)
+var whichAction = myTurn.parAction[1];
+var tarType = myTurn.actionTarg[whichAction];
+if(confuse)
+{
+  //change to different target type
+  if(tarType == 2 && array_length(partyList) > 2)
+    tarType = 1;
+  else if(tarType == 1)
+    tarType = 2;
+  else if(tarType == 3)
+    tarType = 4;
+  else if(tarType == 4)
+    tarType = 3;
+  else if(tarType == 0 || (tarType == 2 && array_length(partyList) <= 2))
+    hitSelf = true;
+  //choose new target
+  if((tarType == 1 && myTurn.isEnemy) || (tarType == 2 && !myTurn.isEnemy))
+  {
+    var rand2 = irandom_range(1, numOfEnemies);
+    rand2 = round(rand2);
+    if(enemyList[rand2] == myTurn)
+    {
+      var targCnt = 1;
+      var rand = irandom(1);
+      if(rand == 1)
+      {
+        rand2++;
+        if(rand2 > array_length(enemyList) - 1)
+          rand2 = 1;
+      }
+      else
+      {
+        rand2--;
+        if(rand2 < 1)
+          rand2 = array_length(enemyList) - 1;
+      }
+      while(targCnt < array_length(enemyList))
+      {
+        if(enemyList[rand2].isKO || enemyList[rand2] == myTurn)
+        {
+          if(rand == 1)
+          {
+            rand2++;
+            if(rand2 > array_length(enemyList) - 1)
+              rand2 = 1;
+          }
+          else
+          {
+            rand2--;
+            if(rand2 < 1)
+              rand2 = array_length(enemyList) - 1;
+          }
+        }
+        else
+          targCnt = array_length(enemyList);
+        targCnt++;
+      }
+    }
+    myTurn.parAction[2] = enemyList[rand2];
+  }
+  else if((tarType == 2 && myTurn.isEnemy) || (tarType == 1 && !myTurn.isEnemy))
+  {
+    rand2 = irandom_range(1, numOfParty);
+    rand2 = round(rand2);
+    if(partyList[rand2] == myTurn)
+    {
+      var targCnt = 1;
+      var rand = irandom(1);
+      if(rand == 1)
+      {
+        rand2++;
+        if(rand2 > array_length(partyList) - 1)
+          rand2 = 1;
+      }
+      else
+      {
+        rand2--;
+        if(rand2 < 1)
+          rand2 = array_length(partyList) - 1;
+      }
+      while(targCnt < array_length(partyList))
+      {
+        if(partyList[rand2].isKO || partyList[rand2] == myTurn)
+        {
+          if(rand == 1)
+          {
+            rand2++;
+            if(rand2 > array_length(partyList) - 1)
+              rand2 = 1;
+          }
+          else
+          {
+            rand2--;
+            if(rand2 < 1)
+              rand2 = array_length(partyList) - 1;
+          }
+        }
+        else
+          targCnt = array_length(partyList);
+        targCnt++;
+      } //if(partyList[rand2] == myTurn)hitSelf = true;
+    }
+    myTurn.parAction[2] = partyList[rand2];
+  }
+  else if(tarType == 0)
+    myTurn.parAction[2] = myTurn;
+  else if((tarType == 3 && myTurn.isEnemy) || (tarType == 4 && !myTurn.isEnemy))
+    myTurn.parAction[2] = partyList;
+  else if((tarType == 4 && myTurn.isEnemy) || (tarType == 3 && !myTurn.isEnemy))
+    myTurn.parAction[2] = enemyList;
+}
+if(array_length(myTurn.parAction) > 2 && tarType < 3)
+{
+  var target = myTurn.parAction[2];
+  if(target == 0)
+    target = myTurn;
+  //if the target is KO'd already, shift to the nearest conscious enemy
+  if(target.isKO)
+  {
+    if((tarType == 2 && !myTurn.isEnemy) || (tarType == 1 && myTurn.isEnemy))
+    {
+      if(enemyList[2].isKO)
+      {
+        if(array_length(enemyList) > 3)
+        {
+          var ran = irandom(1);
+          if(ran == 0)
+          {
+            if(enemyList[1].isKO)
+              target = enemyList[3];
+            else
+              target = enemyList[1];
+          }
+          else if(ran == 1)
+          {
+            if(enemyList[3].isKO)
+              target = enemyList[1];
+            else
+              target = enemyList[3];
+          }
+        }
+        else
+          target = enemyList[1];
+      }
+      else
+        target = enemyList[2];
+    }
+    else if((tarType == 1 && !myTurn.isEnemy) || (tarType == 2 && myTurn.isEnemy))
+    {
+      //same but with party instead of enemy
+      if(partyList[2].isKO)
+      {
+        if(array_length(partyList) > 3)
+        {
+          var ran = irandom(1);
+          if(ran == 0)
+          {
+            if(partyList[1].isKO)
+              target = partyList[3];
+            else
+              target = partyList[1];
+          }
+          else if(ran == 1)
+          {
+            if(partyList[3].isKO)
+              target = partyList[1];
+            else
+              target = partyList[3];
+          }
+        }
+        else
+          target = partyList[1];
+      }
+      else
+        target = partyList[2];
+    }
+  }
+}
+else if(tarType == 3)
+{
+  cnt = 1;
+  if(myTurn.isEnemy)
+  {
+    while(partyList[cnt].isKO)
+    {
+      cnt++;
+    }
+    target[0] = partyList[cnt];
+    cnt++;
+    while(cnt < array_length(partyList))
+    {
+      if(!partyList[cnt].isKO)
+        target[array_length(target)] = partyList[cnt];
+      cnt++;
+    }
+  }
+  else
+  {
+    while(enemyList[cnt].isKO)
+    {
+      cnt++;
+    }
+    target[0] = enemyList[cnt];
+    cnt++;
+    while(cnt < array_length(enemyList))
+    {
+      if(!enemyList[cnt].isKO)
+        target[array_length(target)] = enemyList[cnt];
+      cnt++;
+    }
+  }
+}
+else if(tarType == 4)
+{
+  cnt = 1;
+  if(myTurn.isEnemy)
+  {
+    while(enemyList[cnt].isKO)
+    {
+      cnt++;
+    }
+    target[0] = enemyList[cnt];
+    cnt++;
+    while(cnt < array_length(enemyList))
+    {
+      if(!enemyList[cnt].isKO)
+        target[array_length(target)] = enemyList[cnt];
+      cnt++;
+    }
+  }
+  else
+  {
+    while(partyList[cnt].isKO)
+    {
+      cnt++;
+    }
+    target[0] = partyList[cnt];
+    cnt++;
+    while(cnt < array_length(partyList))
+    {
+      if(!partyList[cnt].isKO)
+        target[array_length(target)] = partyList[cnt];
+      cnt++;
+    }
+  }
+}
+else if(tarType == 5)
+{
+  cnt = 1;
+  while(enemyList[cnt].isKO)
+  {
+    cnt++;
+  }
+  target[0] = enemyList[cnt];
+  cnt++;
+  while(cnt < array_length(enemyList))
+  {
+    if(!enemyList[cnt].isKO)
+      target[array_length(target)] = enemyList[cnt];
+    cnt++;
+  }
+  cnt = 1;
+  while(cnt < array_length(partyList))
+  {
+    if(!partyList[cnt].isKO)
+      target[array_length(target)] = partyList[cnt];
+    cnt++;
+  }
+}
+else
+  var target = myTurn;
+
+var actionEffect = [];
+var actionName = myTurn.action[whichAction];
+var actionEffect = myTurn.actionEff[whichAction];
+var actionAPCost = myTurn.actionAP[whichAction];
+//fix later
+if(array_length(statMessages) < 2)
+  animationMessage[0] = string(myTurn.myName) + " used " + actionName + "!";
+else
+{
+  animationMessage[0] = statMessages[1];
+  var mesCnt = 2;
+  while(mesCnt < array_length(statMessages))
+  {
+    animationMessage[mesCnt-1] = statMessages[mesCnt];
+    mesCnt++;
+  }
+  animationMessage[array_length(animationMessage)] = string(myTurn.myName) + " used " + actionName + "!";
+}
+if(hitSelf)
+{
+  whichAction = 0;
+  actionEffect = [];
+  actionName = myTurn.action[whichAction];
+  actionEffect = myTurn.actionEff[whichAction];
+  actionAPCost = myTurn.actionAP[whichAction];
+  target = myTurn;
+  animationMessage[array_length(animationMessage)] = string(myTurn.myName) + " accidentally hurt themself instead!";
+}
+else if(confuse)
+{
+  if(target != myTurn)
+    animationMessage[array_length(animationMessage)] = string(myTurn.myName) + " accidentally targeted incorrectly!";
+  else
+    animationMessage[array_length(animationMessage)] = string(myTurn.myName) + " accidentally hurt themself instead!";
+  if(myTurn.curHP <= 0)
+  {	//Check for ko
+    myTurn.isKO = true;
+    myTurn.curHP = 0;
+    myTurn.prevDamage = prevHP - myTurn.curHP
+    myTurn.finishDying = false;
+    myTurn.alarm[9] = 1;
+    animationMessage[array_length(animationMessage)] = string(myTurn.myName) + " fainted!";
+  }
+}
+
+/*if(tarType == 2 || tarType == 1)
+{
+  target.drawHealth = true;
+}
+else if(tarType >= 3)
+{
+  cnt = 0;
+  while(cnt < array_length(target))
+  {
+    target[cnt].drawHealth = true;
+    cnt++;
+  }
+}
+else
+{
+  myTurn.drawHealth = true;
+}*/
+//poison reflection
+if(PRef)
+{
+  if(poison && (tarType == 2 || tarType == 3 || tarType == 5))
+  {
+    if(fPoison)
+    {
+      var effNum = 29;
+      var effLvl = PRefAmt/2;
+    }
+    else
+    {
+      var effNum = 14;
+      var effLvl = PRefAmt;
+    }
+    if(is_array(actionEffect[2]))
+    {
+      var cnt = 0;
+      while(cnt < array_length(actionEffect[2]))
+      {
+        if(actionEffect[2][cnt] == effNum)	//untested
+        {
+          actionEffect[3][cnt] += effLvl;
+          cnt = array_length(actionEffect[2]);
+        }
+        cnt++;
+      }
+      if(cnt == array_length(actionEffect[2]))	//works
+      {
+        actionEffect[2][array_length(actionEffect[2])] = effNum;
+        actionEffect[3][array_length(actionEffect[3])] = effLvl;
+      }
+    }
+    else
+    {
+      if(actionEffect[2] == effNum)	//untested
+      {
+        actionEffect[3] += effLvl;
+      }
+      else if(actionEffect[2] == 0)	//works
+      {
+        actionEffect[2] = effNum;
+        actionEffect[3] = effLvl;
+      }
+      else	//untested
+      {
+        var AF2 = actionEffect[2];
+        var AF3 = actionEffect[3];
+        actionEffect[2] = [AF2, effNum];
+        actionEffect[3] = [AF3, effLvl];
+      }
+    }
+  }
+}
+//actual attack
+if(numOfFrozenTurns <= 0)
+  scr_Attack(target, actionEffect, actionAPCost, myTurn, tarType);
+else
+{
+  animationMessage[1] = "But nothing happened!";
+}
