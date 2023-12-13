@@ -1,0 +1,57 @@
+/// @description Sets up the tip drawer
+//set all of the arrays to be what they should be
+overworldTips[0] = "CeraTips(TM) signs! Find these delightful signs posted all around the world with helpful tips about, well, just about everything! For example, you can tell that there's something to interact with when the little \"Z\" icon glows blue in the bottom right corner of the screen. Each time you read a sign for the first time it's tip will be added here to this menu! So be on the lookout for more... CeraTips(TM)!\nBrought to you by CeraTips(TM)!";
+hasOverworldTips[0] = global.ceraTips[0];
+overworldTipDisplayUnlockTip[0] = true;
+overworldTipUnlockTip[0] = "Explore the office";
+overworldTips[1] = "Respawning! You can respawn at any time in the overworld simply by pressing BACKSPACE! Be careful though, as respawning will reset your ES in the same way healing at a heal station will!";
+if(controllerInputs != noone)
+	overworldTips[1] = "Respawning! You can respawn at any time in the overworld simply by pressing LBumper/RBumper! Be careful though, as respawning will reset your ES in the same way healing at a heal station will!";
+hasOverworldTips[1] = true;
+overworldTipDisplayUnlockTip[1] = true;
+overworldTipUnlockTip[1] = "You have this one lol";	//it’s impossible not to have this tip, this won’t ever show
+overworldTips[2] = "Goo creatures are like springs - they can jump higher by crouching DOWN while jumping!\nBrought to you by CeraTips(TM)!";
+if(controllerInputs != noone)
+	overworldTips[2] = "Goo creatures are like springs - they can jump higher by crouching DOWN while jumping! (You may find it easier to control if you crouch with LTrigger or RTrigger)\nBrought to you by CeraTips(TM)!";
+hasOverworldTips[2] = global.ceraTips[9];
+overworldTipDisplayUnlockTip[2] = true;
+overworldTipUnlockTip[2] = "Explore the office";
+//...(this continues for all of overworld, battle, other, and advanced tips. Each sections variables are named the same thing but replace the word “Overworld” with “Battle” or “Other” or “Advanced”, but I didn't want to paste all of those here, just enough to show how it worked.
+
+//calculate what to actually show
+function determineTips(tips, hasTips, tipDisplayUnlockTip, tipUnlockTip)
+{
+	displayTips = [];
+	var cnt = 0;
+	while(cnt < array_length(tips))
+	{
+		if(hasTips[cnt])
+			displayTips[array_length(displayTips)] = tips[cnt];
+		else if(!is_array(tipDisplayUnlockTip[cnt]) && tipDisplayUnlockTip[cnt])
+			displayTips[array_length(displayTips)] = "Tip locked! " + tipUnlockTip[cnt];
+		else if(is_array(tipDisplayUnlockTip[cnt]))
+		{
+			var cnt2 = 0;
+			while(cnt2 < array_length(tipDisplayUnlockTip[cnt]))
+			{
+				if(tipDisplayUnlockTip[cnt][cnt2])
+				{
+					displayTips[array_length(displayTips)] = "Tip locked! " + tipUnlockTip[cnt][cnt2];
+					cnt2 = array_length(tipDisplayUnlockTip[cnt]);
+				}
+				cnt2++;
+			}
+		}
+		cnt++;
+	}
+	return displayTips;
+}
+
+displayBattleTips = determineTips(battleTips, hasBattleTips, battleTipDisplayUnlockTip, battleTipUnlockTip);
+numOfBattleTips = array_length(displayBattleTips);
+displayOverworldTips = determineTips(overworldTips, hasOverworldTips, overworldTipDisplayUnlockTip, overworldTipUnlockTip);
+numOfOverworldTips = array_length(displayOverworldTips);
+displayOtherTips = determineTips(otherTips, hasOtherTips, otherTipDisplayUnlockTip, otherTipUnlockTip);
+numOfOtherTips = array_length(displayOtherTips);
+displayAdvancedTips = determineTips(advancedTips, hasAdvancedTips, advancedTipDisplayUnlockTip, advancedTipUnlockTip);
+numOfAdvancedTips = array_length(displayAdvancedTips);
