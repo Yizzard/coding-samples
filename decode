@@ -1,0 +1,41 @@
+def decode(message_file):
+    #input all lines into a list
+    text_file = open(message_file, 'r')
+    text_line = text_file.readlines()
+    num_of_lines = len(text_line)
+
+    #split list into number and text
+    text_line_text = text_line.copy()
+    text_line_number = text_line.copy()
+    cnt = 0
+    while(cnt < num_of_lines):
+        text_line_text[cnt] = text_line[cnt].split()[1]
+        text_line_number[cnt] = text_line[cnt].split()[0]
+        cnt+=1
+
+    #sort list in order
+    cnt = 0
+    sorted_list = text_line_text.copy()
+    #sorted_num = text_line_number.copy()
+    while(cnt < num_of_lines):
+        #sorted_num[int(text_line_number[cnt])-1] = text_line_number[cnt]
+        sorted_list[int(text_line_number[cnt])-1] = text_line_text[cnt]
+        cnt+=1
+
+    #decode string
+    cnt = 0
+    cnt2 = 1
+    num_of_skipped_lines = 1
+    decoded_string = sorted_list[cnt]
+    cnt+=1
+    while(cnt < num_of_lines):
+        if(cnt2 > num_of_skipped_lines):
+            num_of_skipped_lines+=1
+            decoded_string += " " + sorted_list[cnt]
+            cnt2 = 1
+        else:
+            cnt2+=1
+        cnt+=1
+
+    #return decoded string
+    return decoded_string
