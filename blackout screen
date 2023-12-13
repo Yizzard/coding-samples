@@ -1,0 +1,51 @@
+/// @description Blacks out screen
+/// obj_BlackoutScreen performs this every frame
+if(active)
+{
+	with(obj_BlackoutScreen)	//finds all other obj_BlackoutScreens and keeps only one
+	{
+		if(active)
+		{
+			if(abs(fadeSpd) > abs(other.fadeSpd))
+				instance_destroy();
+		}
+	}
+	if(a > 0)
+	{
+		obj_Player.blackoutScreen = true;	//tells the player the screen is dark
+		if(a == 1 && turnaround)	//in case we need to fade out then back in
+			fadeSpd = -fadeSpd;
+		a = clamp(a - fadeSpd, 0, 1);
+		draw_set_alpha(a);
+		draw_set_color(c_black);
+		draw_rectangle(0,0,room_width,room_height,false);
+		draw_set_alpha(1);
+		if(!instance_exists(obj_BattleAnnouncer))	//fade music volume if not in battle
+		{
+			obj_StevieWonder.volChange = global.musicVolume-a*global.musicVolume;
+			obj_StevieWonder.alarm[3] = 1;
+		}
+	}
+	else if(a != -1)
+	{
+		instance_destroy();
+		var allInactive = true;
+		with(obj_BlackoutScreen)
+		{
+			if(active)
+				allInactive = false;
+		}
+		if(allInactive)
+			obj_Player.blackoutScreen = false;
+		if(!isRoomChangerBlackout)
+		{
+			obj_Player.postBattle = false;
+			obj_Player.postBattleCounter = obj_Player.origPostBattleCnt;
+		}
+	}
+	else	//if a = -1, the screen should stay black until a is changed
+	{
+		draw_set_color(c_black);
+		draw_rectangle(0,0,room_width,room_height,false)
+	}
+}
