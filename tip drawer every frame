@@ -1,0 +1,50 @@
+/// @description Every frame this runs in the obj_TipsDrawer
+var cnt = 0;
+if(choice == 1)
+{
+	displayTips = displayBattleTips;
+}
+else if(choice == 2)
+{
+	displayTips = displayOverworldTips;
+}
+else if(choice == 3)
+{
+	displayTips = displayOtherTips;
+}
+else if(choice == 4)
+{
+	displayTips = displayAdvancedTips;
+}
+while(cnt < array_length(displayTips))
+{
+	if(choice2 == cnt)
+	{
+		draw_set_color(selectedCol);
+	}
+	else
+	{
+		draw_set_color(c_white);
+	}
+	draw_text(cx + xBuffer + tipTypesOffsetX, cy + yBuffer + tipsOffsetY + cnt * stringHeight, "Tip " + string(cnt + 1));
+	if(choice2 == cnt)
+	{
+		draw_set_color(c_white);
+		if(string_height_ext(displayTips[cnt], stringHeight, tipWidth) > tipHeight)
+		{
+			var textSize = .98;
+			var finalStringHeight = stringHeight * textSize;
+			var finalStringWidth = tipWidth / textSize;
+			while(string_height_ext(displayTips[cnt], finalStringHeight, finalStringWidth) > tipHeight)
+			{
+				textSize-=.02;
+				finalStringHeight = stringHeight * textSize;
+				finalStringWidth = tipWidth / textSize;
+			}
+			draw_text_ext_transformed(cx + xBuffer + tipsOffsetX, cy + yBuffer + tipsOffsetY, displayTips[cnt], stringHeight*.98, finalStringWidth, textSize, textSize, 0);
+		}
+		else
+			draw_text_ext(cx + xBuffer + tipsOffsetX, cy + yBuffer + tipsOffsetY, displayTips[cnt], stringHeight, tipWidth);
+	}
+	cnt++;
+}
